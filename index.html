@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>指数・対数 学習アプリ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8F9FC;--bg2:#F0F2F8;--bg3:#EEF0F7;
+  --card:#FFFFFF;--card2:#F5F7FF;
+  --border:#E8ECF4;--border2:#D0D7EC;
+  --accent:#4B7BE5;--accent2:#3B6DD5;--accent-light:#EBF0FD;
+  --green:#22C55E;--green2:#16A34A;--green-light:#DCFCE7;
+  --yellow:#F59E0B;--red:#EF4444;--red2:#DC2626;--red-light:#FEE2E2;
+  --purple:#8B5CF6;--purple-light:#EDE9FE;
+  --text:#1A2035;--text2:#6B7A99;--text3:#9BA8C0;
+  --sidebar:#FFFFFF;--sidebar-w:220px;
+  --serif:'Noto Serif JP',serif;--sans:'Noto Sans JP',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:none;flex-direction:column;position:fixed;top:0;left:0;z-index:200;padding:1.5rem 0;}
+.sidebar.visible{display:flex;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#fff;flex-shrink:0;}
+.logo-text{font-family:var(--serif);font-size:0.88rem;font-weight:700;color:var(--text);line-height:1.3;}
+.nav-section{padding:1rem 0.75rem 0;}
+.nav-item{display:none;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:none;background:transparent;color:var(--text2);font-family:var(--sans);font-size:0.85rem;cursor:pointer;width:100%;text-align:left;transition:all 0.18s;margin-bottom:3px;}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active-nav{background:var(--accent-light);color:var(--accent);font-weight:500;}
+.nav-item .nav-icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
+.sidebar-bottom{margin-top:auto;padding:1rem 0.75rem;border-top:1px solid var(--border);}
+.btn-logout{display:none;width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--sans);font-size:0.82rem;cursor:pointer;text-align:left;transition:all 0.18s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red2);background:var(--red-light);}
+
+/* MAIN */
+.main-content{flex:1;min-height:100vh;margin-left:0;transition:margin-left 0.2s;}
+.main-content.with-sidebar{margin-left:var(--sidebar-w);}
+.screen{display:none;max-width:960px;margin:0 auto;padding:2rem 1.75rem;}
+.screen.active{display:block;}
+
+/* AUTH */
+.center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(75,123,229,0.08);}
+.auth-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;margin:0 auto 1.25rem;}
+.auth-card h1{font-family:var(--serif);font-size:1.3rem;text-align:center;margin-bottom:0.4rem;color:var(--text);}
+.auth-card .sub{color:var(--text2);font-size:0.83rem;text-align:center;margin-bottom:1.75rem;line-height:1.6;}
+.auth-tabs{display:flex;background:var(--bg2);border-radius:10px;padding:3px;margin-bottom:1.5rem;}
+.auth-tab{flex:1;padding:8px;border:none;border-radius:8px;background:transparent;color:var(--text2);font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.form-group{margin-bottom:1rem;}
+.form-label{display:block;font-size:0.8rem;color:var(--text2);margin-bottom:5px;font-weight:500;}
+.form-input{width:100%;padding:9px 12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--sans);font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--accent);background:var(--card);}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A99' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.form-textarea{resize:vertical;min-height:70px;}
+.btn-primary{width:100%;padding:11px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:var(--sans);font-size:0.93rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover:not(:disabled){background:var(--accent2);}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-secondary{padding:9px 18px;background:transparent;border:1.5px solid var(--border2);border-radius:9px;color:var(--text2);font-family:var(--sans);font-size:0.88rem;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);font-size:0.75rem;cursor:pointer;margin-right:3px;transition:all 0.2s;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{border-color:rgba(239,68,68,0.3);color:var(--red2);}
+.btn-danger:hover{border-color:var(--red);background:var(--red-light);}
+.btn-success{background:var(--green);border:none;border-radius:9px;color:#fff;padding:10px 18px;font-family:var(--sans);font-size:0.88rem;cursor:pointer;transition:all 0.2s;font-weight:500;}
+.btn-success:hover{background:var(--green2);}
+.err-msg{color:var(--red2);font-size:0.82rem;margin-top:0.75rem;text-align:center;min-height:1.2em;}
+
+/* ネットワークエラーバナー */
+.net-error-banner{display:none;background:var(--red-light);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:1rem;display:none;align-items:center;gap:0.75rem;font-size:0.85rem;color:var(--red2);}
+.net-error-banner.show{display:flex;}
+.net-error-banner .retry-btn{margin-left:auto;padding:5px 14px;background:var(--red2);color:#fff;border:none;border-radius:7px;font-size:0.78rem;cursor:pointer;white-space:nowrap;font-family:var(--sans);}
+
+/* PAGE HEADER */
+.page-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.75rem;}
+.page-title{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--text);}
+.page-sub{color:var(--text2);font-size:0.83rem;margin-top:4px;}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.25rem 1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+.stat-icon.blue{background:var(--accent-light);}
+.stat-icon.green{background:var(--green-light);}
+.stat-icon.purple{background:var(--purple-light);}
+.stat-val{font-size:1.45rem;font-weight:700;font-family:var(--serif);color:var(--text);}
+.stat-lbl{font-size:0.74rem;color:var(--text2);margin-top:3px;}
+
+/* QUICK CARDS */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.quick-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(75,123,229,0.12);}
+.quick-card.primary-action{background:linear-gradient(135deg,var(--accent),var(--purple));border-color:transparent;color:#fff;}
+.quick-card.primary-action .quick-desc{color:rgba(255,255,255,0.8);}
+.quick-card.primary-action .quick-title{color:#fff;}
+.quick-card.primary-action:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(75,123,229,0.35);}
+.quick-icon{font-size:1.8rem;margin-bottom:0.6rem;}
+.quick-title{font-size:0.95rem;font-weight:600;margin-bottom:0.3rem;color:var(--text);}
+.quick-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
+
+/* CONTINUE CARD */
+.continue-card{background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;}
+.continue-card .cc-label{font-size:0.75rem;opacity:0.8;margin-bottom:0.35rem;}
+.continue-card .cc-title{font-size:1.05rem;font-weight:600;margin-bottom:0.75rem;}
+.continue-card .cc-btn{display:inline-block;padding:8px 20px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:8px;font-size:0.83rem;cursor:pointer;color:#fff;transition:all 0.2s;}
+.continue-card .cc-btn:hover{background:rgba(255,255,255,0.35);}
+
+/* 苦手バナー */
+.weak-banner{background:#FFF7ED;border:1px solid #FED7AA;border-left:3px solid var(--yellow);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:1.25rem;font-size:0.85rem;color:#92400E;}
+.weak-banner .wb-title{font-weight:600;margin-bottom:0.35rem;}
+.weak-banner .wb-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:0.4rem;}
+.weak-banner .wb-tag{background:#FEF3C7;border:1px solid #FDE68A;padding:2px 9px;border-radius:20px;font-size:0.75rem;color:#D97706;}
+.weak-banner .wb-btn{margin-top:0.6rem;padding:6px 14px;background:var(--yellow);color:#fff;border:none;border-radius:7px;font-size:0.78rem;cursor:pointer;font-family:var(--sans);}
+
+/* TEST */
+.test-hdr{display:flex;align-items:center;margin-bottom:1.5rem;gap:0.75rem;}
+.prog-bar-wrap{flex:1;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden;}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:999px;transition:width 0.4s;}
+.q-num{font-size:0.8rem;color:var(--text2);white-space:nowrap;}
+.diff-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.74rem;font-weight:500;margin-bottom:0.75rem;}
+.diff-1{background:var(--green-light);color:var(--green2);}
+.diff-2{background:#FEF3C7;color:#D97706;}
+.diff-3{background:var(--red-light);color:var(--red2);}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.q-text{font-size:1.03rem;line-height:1.9;margin-bottom:1.4rem;font-family:var(--serif);color:var(--text);}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.opt-btn{padding:13px 15px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--serif);font-size:0.92rem;cursor:pointer;text-align:left;transition:all 0.2s;line-height:1.5;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light);}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light);color:var(--green2);}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light);color:var(--red2);}
+.opt-btn.show-ok{border-color:var(--green);background:var(--green-light);}
+.opt-btn:disabled{cursor:default;}
+.exp-box{background:var(--accent-light);border:1px solid rgba(75,123,229,0.2);border-left:3px solid var(--accent);border-radius:9px;padding:1.1rem;margin-top:1.1rem;font-size:0.87rem;line-height:1.75;color:var(--text2);display:none;}
+.exp-box.show{display:block;}
+.next-btn{width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:var(--sans);font-size:0.92rem;font-weight:500;cursor:pointer;margin-top:0.9rem;display:none;}
+.next-btn.show{display:block;}
+.next-btn:hover{background:var(--accent2);}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;gap:1rem;color:var(--text2);}
+.spinner{width:38px;height:38px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* RESULT */
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.25rem;text-align:center;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.score-ring{width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--accent) var(--pct,0%),var(--bg3) var(--pct,0%));display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+.score-inner{width:80px;height:80px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.score-num{font-size:1.5rem;font-weight:700;color:var(--text);}
+.score-sub{font-size:0.7rem;color:var(--text2);}
+.weak-tag{display:inline-block;padding:4px 10px;border-radius:20px;background:var(--red-light);color:var(--red2);border:1px solid rgba(239,68,68,0.2);font-size:0.77rem;margin:3px;}
+.rec-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:0.9rem 1.1rem;display:flex;align-items:center;gap:0.9rem;cursor:pointer;transition:all 0.2s;margin-bottom:0.5rem;}
+.rec-item:hover{border-color:var(--accent);transform:translateX(3px);}
+.rec-n{width:34px;height:34px;border-radius:8px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.83rem;font-weight:700;flex-shrink:0;}
+.rec-info{flex:1;}
+.rec-title{font-size:0.88rem;font-weight:500;margin-bottom:2px;color:var(--text);}
+.rec-sub{font-size:0.76rem;color:var(--text2);}
+
+/* LESSONS LIST */
+.filter-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.25rem;}
+.filter-chip{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:var(--card);color:var(--text2);font-size:0.78rem;cursor:pointer;transition:all 0.2s;}
+.filter-chip.active,.filter-chip:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.chapter-label{font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin:1rem 0 0.6rem;padding-left:2px;}
+.ls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.9rem;}
+.ls-card{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.ls-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(75,123,229,0.1);}
+.ls-thumb{height:100px;background:linear-gradient(135deg,var(--accent-light),var(--purple-light));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.ls-formula{font-family:var(--serif);font-size:1rem;color:var(--accent);opacity:0.85;text-align:center;padding:0.5rem;}
+.ls-play{position:absolute;inset:0;background:rgba(75,123,229,0.15);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+.ls-card:hover .ls-play{opacity:1;}
+.play-circle{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:0.9rem;}
+.ls-badge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.62rem;}
+.ls-info{padding:0.9rem;}
+.ls-order{font-size:0.7rem;color:var(--text3);margin-bottom:3px;}
+.ls-name{font-size:0.87rem;font-weight:500;margin-bottom:5px;color:var(--text);}
+.ls-meta{display:flex;align-items:center;justify-content:space-between;font-size:0.72rem;color:var(--text2);}
+.topic-tag{background:var(--accent-light);color:var(--accent);padding:2px 7px;border-radius:20px;font-size:0.7rem;}
+/* 復習おすすめバッジ */
+.rec-badge{background:#FEF3C7;color:#D97706;border:1px solid #FDE68A;padding:2px 7px;border-radius:20px;font-size:0.68rem;}
+
+/* VIDEO SCREEN */
+.vid-layout{display:grid;grid-template-columns:1fr 260px;gap:1.25rem;}
+.vid-sidebar{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.1rem;height:fit-content;}
+.vid-sidebar h3{font-size:0.78rem;color:var(--text2);margin-bottom:0.7rem;text-transform:uppercase;letter-spacing:0.04em;}
+.plan-item{display:flex;align-items:center;gap:0.6rem;padding:6px 8px;border-radius:7px;font-size:0.8rem;cursor:pointer;transition:background 0.15s;margin-bottom:2px;color:var(--text2);}
+.plan-item:hover{background:var(--bg2);}
+.plan-item.current-plan{background:var(--accent-light);color:var(--accent);}
+.plan-item.done-plan{color:var(--text3);}
+.plan-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* 学習済みボタンエリア */
+.lesson-actions{display:flex;gap:0.6rem;margin-top:0.9rem;flex-wrap:wrap;}
+.done-indicator{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;background:var(--green-light);border:1px solid rgba(34,197,94,0.3);border-radius:9px;color:var(--green2);font-size:0.83rem;font-weight:500;}
+
+/* MYPAGE */
+.mp-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:1.75rem;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.mp-profile{display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;}
+.mp-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;}
+.mp-name{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--text);}
+.mp-email{color:var(--text2);font-size:0.83rem;margin-top:2px;}
+.mp-role-badge{display:inline-block;margin-top:0.4rem;padding:2px 10px;border-radius:20px;background:var(--green-light);color:var(--green2);font-size:0.76rem;}
+.mp-ring-wrap{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.25rem;}
+.progress-ring-svg{transform:rotate(-90deg);}
+.ring-label{font-size:0.8rem;color:var(--text2);}
+.ring-pct{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.mp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;margin-bottom:1.25rem;}
+.mp-stat{background:var(--bg2);border-radius:12px;padding:1rem;text-align:center;}
+.mp-stat-val{font-size:1.25rem;font-weight:700;color:var(--accent);}
+.mp-stat-lbl{font-size:0.7rem;color:var(--text2);margin-top:3px;}
+.prog-bg{height:8px;background:var(--bg3);border-radius:999px;overflow:hidden;margin:0.4rem 0;}
+.prog-fg{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:999px;transition:width 0.5s;}
+
+/* TABS */
+.tab-nav{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:2px solid var(--border);overflow-x:auto;}
+.tab-btn{padding:8px 15px;border:none;background:transparent;color:var(--text2);font-size:0.83rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;white-space:nowrap;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:0.83rem;}
+.tbl th{text-align:left;padding:9px 11px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:500;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.04em;}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg2);}
+.tbl-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:12px;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(26,32,53,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:1.75rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+.modal-title{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--text);}
+.modal-close{background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;}
+.modal-footer{display:flex;gap:0.7rem;justify-content:flex-end;margin-top:1.25rem;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.full-col{grid-column:1/-1;}
+
+/* ADMIN STATS */
+.big-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.big-stat{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.25rem;text-align:center;}
+.big-val{font-size:2rem;font-weight:700;color:var(--accent);font-family:var(--serif);}
+.big-lbl{font-size:0.78rem;color:var(--text2);margin-top:5px;}
+
+/* ADD ROW */
+.add-row{display:flex;gap:0.7rem;margin-bottom:1.25rem;}
+.add-row input{flex:1;}
+
+/* CHIPS */
+.chip-wrap{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem;}
+.chip{padding:4px 11px;border-radius:20px;background:var(--accent-light);color:var(--accent);border:1px solid rgba(75,123,229,0.2);font-size:0.76rem;}
+
+/* PENDING */
+.pending-icon{font-size:3rem;margin-bottom:1rem;}
+
+/* レスポンシブ */
+@media(max-width:700px){
+  .sidebar{width:100%;min-height:auto;position:fixed;top:auto;bottom:0;left:0;flex-direction:row;border-right:none;border-top:1px solid var(--border);padding:0.4rem 0;z-index:300;}
+  .sidebar.visible{display:flex;}
+  .sidebar-logo{display:none;}
+  .nav-section{display:flex;flex-direction:row;padding:0 0.4rem;gap:0;width:100%;}
+  .nav-item{flex-direction:column;gap:2px;padding:6px 4px;font-size:0.6rem;min-width:0;flex:1;align-items:center;border-radius:8px;margin-bottom:0;}
+  .nav-item .nav-icon{width:auto;font-size:1.15rem;}
+  .sidebar-bottom{display:none;}
+  .main-content.with-sidebar{margin-left:0;padding-bottom:70px;}
+  .screen{padding:1.25rem 1rem;}
+  .opts-grid{grid-template-columns:1fr;}
+  .quick-grid{grid-template-columns:1fr;}
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .vid-layout{grid-template-columns:1fr;}
+  .vid-sidebar{display:none;}
+  .two-col{grid-template-columns:1fr;}
+  .full-col{grid-column:1;}
+  .mp-stats{grid-template-columns:repeat(3,1fr);}
+  .ls-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .page-title{font-size:1.2rem;}
+}
+@media(max-width:400px){
+  .stat-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">𝑒ˣ</div>
+    <div class="logo-text">指数・対数<br>学習アプリ</div>
+  </div>
+  <div class="nav-section">
+    <button class="nav-item" id="nav-home" onclick="navTo('home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" id="nav-teacher-home" onclick="navTo('teacher-home')"><span class="nav-icon">🏠</span>ホーム</button>
+    <button class="nav-item" id="nav-test" onclick="navTo('pre-test')"><span class="nav-icon">📝</span>テスト</button>
+    <button class="nav-item" id="nav-lessons" onclick="navTo('lessons')"><span class="nav-icon">🎬</span>授業</button>
+    <button class="nav-item" id="nav-mypage" onclick="navTo('mypage')"><span class="nav-icon">👤</span>マイページ</button>
+    <button class="nav-item" id="nav-teacher" onclick="navTo('teacher')"><span class="nav-icon">👨‍🏫</span>管理</button>
+    <button class="nav-item" id="nav-admin" onclick="navTo('admin')"><span class="nav-icon">⚙️</span>管理者</button>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" id="btn-logout" onclick="logout()">🚪 ログアウト</button>
+  </div>
+</nav>
+
+<div class="main-content" id="main-content">
+
+<!-- ===== LOGIN ===== -->
+<div class="screen active" id="screen-login">
+  <div class="center-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">𝑒ˣ</div>
+      <h1>指数・対数 学習アプリ</h1>
+      <p class="sub">高校数学の指数・対数を<br>あなたのペースで丁寧に学習しましょう。</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">ログイン</button>
+        <button class="auth-tab"        onclick="switchAuthTab('register')">新規登録</button>
+      </div>
+      <div id="auth-login">
+        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="login-email" type="email" placeholder="example@email.com"></div>
+        <div class="form-group"><label class="form-label">パスワード</label><input class="form-input" id="login-pass" type="password" placeholder="パスワード" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn-primary" id="login-btn" onclick="doLogin()">ログイン</button>
+        <div class="err-msg" id="login-err"></div>
+      </div>
+      <div id="auth-register" style="display:none;">
+        <div class="form-group"><label class="form-label">名前</label><input class="form-input" id="reg-name" placeholder="山田 太郎"></div>
+        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="reg-email" type="email" placeholder="example@email.com"></div>
+        <div class="form-group"><label class="form-label">パスワード（6文字以上）</label><input class="form-input" id="reg-pass" type="password" placeholder="パスワード"></div>
+        <div class="form-group">
+          <label class="form-label">登録種別</label>
+          <select class="form-input form-select" id="reg-role">
+            <option value="pending">生徒（教師の承認が必要）</option>
+            <option value="teacher-pending">教師（管理者の承認が必要）</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="reg-btn" onclick="doRegister()">登録する</button>
+        <div class="err-msg" id="reg-err"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PENDING ===== -->
+<div class="screen" id="screen-pending">
+  <div class="center-wrap">
+    <div class="auth-card" style="text-align:center;">
+      <div class="pending-icon">⏳</div>
+      <h2 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:0.75rem;">承認待ちです</h2>
+      <p style="color:var(--text2);line-height:1.7;margin-bottom:1.5rem;" id="pending-msg">管理者または担当の教師がアカウントを承認するまでお待ちください。</p>
+      <button class="btn-secondary" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOME ===== -->
+<div class="screen" id="screen-home">
+  <div class="page-hdr">
+    <div><div class="page-title">こんにちは、<span id="home-name"></span> 👋</div><div class="page-sub">今日も一緒に学習しましょう！</div></div>
+  </div>
+
+  <!-- ネットワークエラーバナー -->
+  <div class="net-error-banner" id="home-net-err">
+    <span>⚠️ データの読み込みに失敗しました。</span>
+    <button class="retry-btn" onclick="loadHome()">再試行</button>
+  </div>
+
+  <!-- 続きから（優先表示） -->
+  <div class="continue-card" id="continue-card" style="display:none;">
+    <div class="cc-label">📚 学習を再開する</div>
+    <div class="cc-title" id="continue-title">前回の続きから始めましょう</div>
+    <button class="cc-btn" onclick="navTo('lessons')">続きから学ぶ →</button>
+  </div>
+
+  <!-- 苦手分野バナー -->
+  <div id="weak-banner" style="display:none;" class="weak-banner">
+    <div class="wb-title">📌 復習おすすめの分野があります</div>
+    <div id="wb-tags" class="wb-tags"></div>
+    <button class="wb-btn" onclick="navTo('lessons')">復習動画を見る</button>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-icon blue">📝</div><div><div class="stat-val" id="h-score">—</div><div class="stat-lbl">テストスコア</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">🎬</div><div><div class="stat-val" id="h-progress">—</div><div class="stat-lbl">授業進捗</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">✅</div><div><div class="stat-val" id="h-status">未実施</div><div class="stat-lbl">テスト状況</div></div></div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-card primary-action" onclick="navTo('pre-test')"><div class="quick-icon">📝</div><div class="quick-title">実力テスト</div><div class="quick-desc">あなたの実力を診断して最適な学習プランを作成します</div></div>
+    <div class="quick-card" onclick="navTo('lessons')"><div class="quick-icon">🎬</div><div class="quick-title">授業動画</div><div class="quick-desc">丁寧な解説動画で指数・対数をマスターしましょう</div></div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+    <div style="font-size:0.83rem;font-weight:600;margin-bottom:0.75rem;color:var(--text);">📚 学習カリキュラム</div>
+    <div class="chip-wrap">
+      <span class="chip">指数法則</span><span class="chip">指数の計算</span><span class="chip">累乗根</span><span class="chip">指数関数</span><span class="chip">指数方程式</span><span class="chip">指数不等式</span><span class="chip">対数の定義</span><span class="chip">対数の性質</span><span class="chip">底の変換</span><span class="chip">常用対数</span><span class="chip">対数関数</span><span class="chip">対数方程式</span><span class="chip">対数不等式</span><span class="chip">桁数・最高位</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TEACHER HOME ===== -->
+<div class="screen" id="screen-teacher-home">
+  <div class="page-hdr">
+    <div><div class="page-title">教師ホーム 👨‍🏫</div><div class="page-sub">生徒・問題・動画を管理できます</div></div>
+  </div>
+  <div class="quick-grid">
+    <div class="quick-card" onclick="navTo('teacher');setTimeout(()=>teacherTab('questions',document.querySelectorAll('.tab-btn')[1]),100)">
+      <div class="quick-icon">📝</div><div class="quick-title">問題管理</div><div class="quick-desc">実力テストの問題を追加・編集・削除できます</div>
+    </div>
+    <div class="quick-card" onclick="navTo('teacher');setTimeout(()=>teacherTab('lessons',document.querySelectorAll('.tab-btn')[2]),100)">
+      <div class="quick-icon">🎬</div><div class="quick-title">授業動画管理</div><div class="quick-desc">授業動画の追加・編集・削除ができます</div>
+    </div>
+    <div class="quick-card" onclick="navTo('teacher');setTimeout(()=>teacherTab('students',document.querySelectorAll('.tab-btn')[0]),100)">
+      <div class="quick-icon">👨‍🎓</div><div class="quick-title">生徒管理</div><div class="quick-desc">担当生徒の進捗確認・追加・削除ができます</div>
+    </div>
+    <div class="quick-card" onclick="navTo('teacher');setTimeout(()=>teacherTab('review',document.querySelectorAll('.tab-btn')[3]),100)">
+      <div class="quick-icon">🔁</div><div class="quick-title">復習問題管理</div><div class="quick-desc">各授業動画の復習問題を管理できます</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRE-TEST ===== -->
+<div class="screen" id="screen-pre-test">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.25rem;text-align:center;margin-top:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+    <div style="font-size:2.2rem;margin-bottom:0.9rem;">📝</div>
+    <h2 style="font-family:var(--serif);font-size:1.4rem;margin-bottom:0.75rem;color:var(--text);">実力テスト</h2>
+    <p style="color:var(--text2);line-height:1.7;margin-bottom:1.75rem;">基礎から応用まで段階的に出題します。<br>あなたの理解度に合わせた学習プランを自動作成します。</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.75rem;text-align:center;">
+      <div style="background:var(--bg2);border-radius:11px;padding:1.1rem 0.75rem;"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin:0 auto 0.6rem;">1</div><div style="font-size:0.79rem;color:var(--text2);line-height:1.5;">基礎〜応用の問題を順番に解く</div></div>
+      <div style="background:var(--bg2);border-radius:11px;padding:1.1rem 0.75rem;"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin:0 auto 0.6rem;">2</div><div style="font-size:0.79rem;color:var(--text2);line-height:1.5;">苦手分野を自動で抽出</div></div>
+      <div style="background:var(--bg2);border-radius:11px;padding:1.1rem 0.75rem;"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin:0 auto 0.6rem;">3</div><div style="font-size:0.79rem;color:var(--text2);line-height:1.5;">専用の学習プランを作成</div></div>
+    </div>
+    <p style="color:var(--text3);font-size:0.79rem;margin-bottom:1.25rem;">※ 最初の問題でつまずいた場合はテストを終了し、基礎から学習を始めます</p>
+    <button style="display:block;width:100%;max-width:320px;margin:0 auto;padding:15px;background:linear-gradient(135deg,var(--accent),var(--purple));border:none;border-radius:13px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(75,123,229,0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="startTest()">テストを開始する →</button>
+  </div>
+</div>
+
+<!-- ===== TEST ===== -->
+<div class="screen" id="screen-test">
+  <div class="loading" id="test-loading"><div class="spinner"></div><div>問題を読み込んでいます...</div></div>
+  <div id="test-net-err" class="net-error-banner">
+    <span>⚠️ 問題の読み込みに失敗しました。</span>
+    <button class="retry-btn" onclick="startTest()">再試行</button>
+  </div>
+  <div id="test-body" style="display:none;">
+    <div class="test-hdr">
+      <span class="q-num" id="q-num">1/10</span>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" id="q-prog" style="width:0%"></div></div>
+      <button class="btn-secondary" style="padding:5px 11px;font-size:0.76rem;" onclick="navTo('home')">中断</button>
+    </div>
+    <div class="q-card">
+      <div id="q-diff" class="diff-badge diff-1">基礎</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="opts-grid" id="q-opts"></div>
+      <div class="exp-box" id="q-exp"></div>
+    </div>
+    <button class="next-btn" id="q-next">次の問題へ →</button>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <div class="score-ring" id="res-ring"><div class="score-inner"><div class="score-num" id="res-score">—</div><div class="score-sub" id="res-sub"></div></div></div>
+    <h2 style="font-family:var(--serif);font-size:1.3rem;margin-bottom:0.5rem;color:var(--text);">テスト結果</h2>
+    <p style="color:var(--text2);font-size:0.88rem;" id="res-msg"></p>
+    <div style="margin-top:1.25rem;text-align:left;">
+      <div style="font-size:0.76rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">苦手分野</div>
+      <div id="res-weak"></div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:0.86rem;font-weight:600;margin-bottom:0.7rem;color:var(--text);">📚 おすすめ学習プラン</div>
+    <div id="res-plan"></div>
+    <button class="btn-primary" style="margin-top:0.9rem;" onclick="startLessonPlan(0)">学習を開始する →</button>
+    <button class="btn-secondary" style="width:100%;margin-top:0.6rem;" onclick="navTo('home')">ホームに戻る</button>
+  </div>
+</div>
+
+<!-- ===== VIDEO SCREEN ===== -->
+<div class="screen" id="screen-lesson">
+  <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:1.1rem;">
+    <button class="btn-secondary" style="padding:5px 11px;font-size:0.76rem;" onclick="navTo('lessons')">← 一覧</button>
+    <span style="font-size:0.8rem;color:var(--text2);" id="vid-counter">1/10</span>
+  </div>
+  <div class="vid-layout">
+    <div>
+      <div id="vid-wrap" style="margin-bottom:1.1rem;"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.25rem;margin-bottom:0.9rem;">
+        <div style="font-size:0.73rem;color:var(--accent);margin-bottom:3px;" id="vid-topic"></div>
+        <h2 style="font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:0.6rem;color:var(--text);" id="vid-title"></h2>
+        <p style="font-size:0.85rem;color:var(--text2);line-height:1.65;" id="vid-desc"></p>
+      </div>
+      <div class="lesson-actions">
+        <button class="btn-primary" id="vid-review-btn" onclick="goToReview()" style="flex:1;">復習問題を解く →</button>
+        <button class="btn-success" id="vid-done-btn" onclick="markDoneAndNext()" style="white-space:nowrap;">✓ 学習済みにする</button>
+      </div>
+      <div id="vid-done-indicator" style="display:none;" class="done-indicator" style="margin-top:0.6rem;">✅ この授業は学習済みです</div>
+    </div>
+    <div class="vid-sidebar">
+      <h3>学習プラン</h3>
+      <div id="plan-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REVIEW ===== -->
+<div class="screen" id="screen-review">
+  <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:1.1rem;">
+    <h2 style="font-family:var(--serif);font-size:1.05rem;color:var(--text);" id="rev-title">復習問題</h2>
+    <span style="font-size:0.8rem;color:var(--text2);">問 <span id="rev-cur">1</span> / <span id="rev-tot">5</span></span>
+  </div>
+  <div id="rev-area"></div>
+</div>
+
+<!-- ===== LESSONS LIST ===== -->
+<div class="screen" id="screen-lessons">
+  <div class="page-hdr">
+    <div><div class="page-title">授業動画一覧</div><div class="page-sub">指数と対数を基礎から応用まで</div></div>
+  </div>
+  <div class="filter-chips" id="filter-chips">
+    <button class="filter-chip active" onclick="filterLessons(null,this)">すべて</button>
+    <button class="filter-chip" onclick="filterLessons('指数',this)">指数</button>
+    <button class="filter-chip" onclick="filterLessons('対数',this)">対数</button>
+  </div>
+  <div id="ls-grid"></div>
+</div>
+
+<!-- ===== MYPAGE ===== -->
+<div class="screen" id="screen-mypage">
+  <div class="page-hdr">
+    <div><div class="page-title">マイページ</div><div class="page-sub">学習状況を確認できます</div></div>
+  </div>
+  <div class="mp-card">
+    <div class="mp-profile">
+      <div class="mp-avatar">👤</div>
+      <div>
+        <div class="mp-name" id="mp-name">—</div>
+        <div class="mp-email" id="mp-email">—</div>
+        <div class="mp-role-badge" id="mp-role">生徒</div>
+      </div>
+    </div>
+    <div class="mp-ring-wrap">
+      <svg width="80" height="80" class="progress-ring-svg">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--bg3)" stroke-width="7"/>
+        <circle id="ring-arc" cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="7"
+          stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round" style="transition:stroke-dashoffset 0.6s;"/>
+      </svg>
+      <div>
+        <div class="ring-pct" id="mp-pct">0%</div>
+        <div class="ring-label">学習進捗</div>
+      </div>
+    </div>
+    <div class="mp-stats">
+      <div class="mp-stat"><div class="mp-stat-val" id="mp-score">—</div><div class="mp-stat-lbl">テストスコア</div></div>
+      <div class="mp-stat"><div class="mp-stat-val" id="mp-done">0</div><div class="mp-stat-lbl">完了授業</div></div>
+      <div class="mp-stat"><div class="mp-stat-val" id="mp-plan-cnt">0</div><div class="mp-stat-lbl">プラン数</div></div>
+    </div>
+    <div>
+      <div style="font-size:0.76rem;color:var(--text2);margin-bottom:0.4rem;">苦手分野</div>
+      <div id="mp-weak"></div>
+    </div>
+  </div>
+  <button class="btn-secondary" style="width:100%;" onclick="logout()">ログアウト</button>
+</div>
+
+<!-- ===== TEACHER ===== -->
+<div class="screen" id="screen-teacher">
+  <div class="page-hdr"><div><div class="page-title">👨‍🏫 教師ダッシュボード</div><div class="page-sub">生徒・問題・動画を管理できます</div></div></div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="teacherTab('students',this)">生徒管理</button>
+    <button class="tab-btn" onclick="teacherTab('questions',this)">問題管理</button>
+    <button class="tab-btn" onclick="teacherTab('lessons',this)">動画管理</button>
+    <button class="tab-btn" onclick="teacherTab('review',this)">復習問題</button>
+  </div>
+  <div class="tab-panel active" id="tp-students">
+    <div class="add-row"><input class="form-input" id="add-email" placeholder="生徒のメールアドレス"><button class="btn-primary" style="width:auto;padding:9px 18px;" onclick="addStudent()">追加</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>名前</th><th>テスト</th><th>進捗</th><th>苦手分野</th><th>操作</th></tr></thead><tbody id="student-tbody"></tbody></table></div>
+  </div>
+  <div class="tab-panel" id="tp-questions">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button class="btn-primary" style="width:auto;padding:9px 18px;" onclick="openQModal()">+ 問題を追加</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>難易度</th><th>問題文</th><th>トピック</th><th>操作</th></tr></thead><tbody id="q-tbody"></tbody></table></div>
+  </div>
+  <div class="tab-panel" id="tp-lessons">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:0.9rem;"><button class="btn-primary" style="width:auto;padding:9px 18px;" onclick="openLModal()">+ 動画を追加</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>タイトル</th><th>トピック</th><th>動画URL</th><th>操作</th></tr></thead><tbody id="l-tbody"></tbody></table></div>
+  </div>
+  <div class="tab-panel" id="tp-review">
+    <div style="display:flex;gap:0.7rem;margin-bottom:0.9rem;align-items:flex-end;">
+      <div style="flex:1;"><label class="form-label">授業動画を選択</label><select class="form-input form-select" id="rq-lesson-sel" onchange="loadRQ()"><option value="">動画を選択...</option></select></div>
+      <button class="btn-primary" style="width:auto;padding:9px 18px;" onclick="openRQModal()">+ 問題を追加</button>
+    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>問題文</th><th>操作</th></tr></thead><tbody id="rq-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="screen" id="screen-admin">
+  <div class="page-hdr"><div><div class="page-title">⚙️ 管理者ダッシュボード</div><div class="page-sub">全ユーザーとシステムを管理します</div></div></div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="adminTab('users',this)">ユーザー管理</button>
+    <button class="tab-btn" onclick="adminTab('stats',this)">統計</button>
+  </div>
+  <div class="tab-panel active" id="ap-users">
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>名前</th><th>メール</th><th>ロール</th><th>操作</th></tr></thead><tbody id="admin-tbody"></tbody></table></div>
+  </div>
+  <div class="tab-panel" id="ap-stats">
+    <div class="big-stat-grid">
+      <div class="big-stat"><div class="big-val" id="st-students">—</div><div class="big-lbl">生徒数</div></div>
+      <div class="big-stat"><div class="big-val" id="st-teachers">—</div><div class="big-lbl">教師数</div></div>
+      <div class="big-stat"><div class="big-val" id="st-pending">—</div><div class="big-lbl">承認待ち</div></div>
+      <div class="big-stat"><div class="big-val" id="st-tested">—</div><div class="big-lbl">テスト受験者</div></div>
+      <div class="big-stat"><div class="big-val" id="st-avg">—</div><div class="big-lbl">平均スコア</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 問題 ===== -->
+<div class="modal-bg" id="m-q">
+  <div class="modal-box">
+    <div class="modal-hdr"><div class="modal-title" id="m-q-title">問題を追加</div><button class="modal-close" onclick="closeM('m-q')">✕</button></div>
+    <input type="hidden" id="mq-id">
+    <div class="form-group full-col"><label class="form-label">問題文（HTMLタグ可）</label><textarea class="form-input form-textarea" id="mq-q" rows="4" placeholder="例：log₂8 の値を求めよ。"></textarea></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">選択肢①（0）</label><input class="form-input" id="mq-o0"></div>
+      <div class="form-group"><label class="form-label">選択肢②（1）</label><input class="form-input" id="mq-o1"></div>
+      <div class="form-group"><label class="form-label">選択肢③（2）</label><input class="form-input" id="mq-o2"></div>
+      <div class="form-group"><label class="form-label">選択肢④（3）</label><input class="form-input" id="mq-o3"></div>
+      <div class="form-group"><label class="form-label">正解</label><select class="form-input form-select" id="mq-ans"><option value="0">①</option><option value="1">②</option><option value="2">③</option><option value="3">④</option></select></div>
+      <div class="form-group"><label class="form-label">難易度</label><select class="form-input form-select" id="mq-diff"><option value="1">1 基礎</option><option value="2">2 標準</option><option value="3">3 応用</option></select></div>
+      <div class="form-group full-col"><label class="form-label">トピック</label><input class="form-input" id="mq-topic" placeholder="例：対数の計算"></div>
+      <div class="form-group full-col"><label class="form-label">解説</label><textarea class="form-input form-textarea" id="mq-exp" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeM('m-q')">キャンセル</button><button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveQ()">保存</button></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 動画 ===== -->
+<div class="modal-bg" id="m-l">
+  <div class="modal-box">
+    <div class="modal-hdr"><div class="modal-title" id="m-l-title">動画を追加</div><button class="modal-close" onclick="closeM('m-l')">✕</button></div>
+    <input type="hidden" id="ml-id">
+    <div class="two-col">
+      <div class="form-group full-col"><label class="form-label">タイトル</label><input class="form-input" id="ml-title" placeholder="例：指数法則の基本"></div>
+      <div class="form-group"><label class="form-label">トピック</label><input class="form-input" id="ml-topic" placeholder="例：指数法則"></div>
+      <div class="form-group"><label class="form-label">順番</label><input class="form-input" type="number" id="ml-order" placeholder="1"></div>
+      <div class="form-group full-col"><label class="form-label">YouTube URL または 動画URL</label><input class="form-input" id="ml-url" placeholder="https://www.youtube.com/watch?v=..."></div>
+      <div class="form-group"><label class="form-label">動画時間（分）</label><input class="form-input" type="number" id="ml-dur" value="5"></div>
+      <div class="form-group"><label class="form-label">サムネイル数式</label><input class="form-input" id="ml-formula" placeholder="例：aᵐ × aⁿ = aᵐ⁺ⁿ"></div>
+      <div class="form-group full-col"><label class="form-label">説明</label><textarea class="form-input form-textarea" id="ml-desc" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeM('m-l')">キャンセル</button><button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveL()">保存</button></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: 復習問題 ===== -->
+<div class="modal-bg" id="m-rq">
+  <div class="modal-box">
+    <div class="modal-hdr"><div class="modal-title" id="m-rq-title">復習問題を追加</div><button class="modal-close" onclick="closeM('m-rq')">✕</button></div>
+    <input type="hidden" id="mrq-id">
+    <input type="hidden" id="mrq-lid">
+    <div class="form-group"><label class="form-label">問題文</label><textarea class="form-input form-textarea" id="mrq-q" rows="3"></textarea></div>
+    <div class="two-col">
+      <div class="form-group"><label class="form-label">選択肢①（0）</label><input class="form-input" id="mrq-o0"></div>
+      <div class="form-group"><label class="form-label">選択肢②（1）</label><input class="form-input" id="mrq-o1"></div>
+      <div class="form-group"><label class="form-label">選択肢③（2）</label><input class="form-input" id="mrq-o2"></div>
+      <div class="form-group"><label class="form-label">選択肢④（3）</label><input class="form-input" id="mrq-o3"></div>
+      <div class="form-group"><label class="form-label">正解</label><select class="form-input form-select" id="mrq-ans"><option value="0">①</option><option value="1">②</option><option value="2">③</option><option value="3">④</option></select></div>
+      <div class="form-group full-col"><label class="form-label">解説</label><textarea class="form-input form-textarea" id="mrq-exp" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeM('m-rq')">キャンセル</button><button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="saveRQ()">保存</button></div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz5-p0PR3qLEjO6kGMLfZakFN2FhK3OYMA3Hu0fz1j6sc5piwyBen3KOyBufuG5js_RjQ/exec";
+
+let session = JSON.parse(localStorage.getItem("session") || "null");
+let currentUser = session ? session.user : null;
+let testQs = [], testIdx = 0, testRes = [];
+let lessonPlan = [], lessonIdx = 0;
+let allLessons = [];
+// 二重送信防止フラグ
+let testSubmitting = false;
+let loginSubmitting = false;
+
+// ─── API ───────────────────────────────────────────────
+async function api(action, data = {}) {
+  const token = session ? session.token : null;
+  const res = await fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({ action, token, ...data })
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || "エラーが発生しました");
+  return json.data;
+}
+
+const $ = id => document.getElementById(id);
+
+function showNetErr(bannerId, show) {
+  const el = $(bannerId);
+  if (!el) return;
+  el.classList.toggle("show", show);
+}
+
+// ─── 画面切替 ──────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+
+function showNav(role) {
+  document.querySelectorAll(".nav-item").forEach(t => t.style.display = "none");
+  $("btn-logout").style.display = "none";
+  const sidebar = $("sidebar");
+  const main = $("main-content");
+  if (!role) {
+    sidebar.classList.remove("visible");
+    main.classList.remove("with-sidebar");
+    return;
+  }
+  sidebar.classList.add("visible");
+  main.classList.add("with-sidebar");
+  $("btn-logout").style.display = "block";
+  if (role === "student") {
+    ["nav-home","nav-test","nav-lessons","nav-mypage"].forEach(id => $(id).style.display = "flex");
+  } else if (role === "teacher") {
+    ["nav-teacher-home","nav-teacher"].forEach(id => $(id).style.display = "flex");
+  } else if (role === "admin") {
+    ["nav-admin"].forEach(id => $(id).style.display = "flex");
+  }
+}
+
+function setActiveNav(navId) {
+  document.querySelectorAll(".nav-item").forEach(t => t.classList.remove("active-nav"));
+  if (navId && $(navId)) $(navId).classList.add("active-nav");
+}
+
+function navTo(page) {
+  if (page === "home")         { showScreen("screen-home");         setActiveNav("nav-home");         loadHome(); }
+  if (page === "teacher-home") { showScreen("screen-teacher-home"); setActiveNav("nav-teacher-home"); }
+  if (page === "pre-test")     { showScreen("screen-pre-test");     setActiveNav("nav-test"); }
+  if (page === "lessons")      { showScreen("screen-lessons");      setActiveNav("nav-lessons");      loadLessonsList(); }
+  if (page === "mypage")       { showScreen("screen-mypage");       setActiveNav("nav-mypage");       loadMyPage(); }
+  if (page === "teacher")      { showScreen("screen-teacher");      setActiveNav("nav-teacher");      teacherTab("students", document.querySelector(".tab-btn")); loadStudents(); }
+  if (page === "admin")        { showScreen("screen-admin");        setActiveNav("nav-admin");        adminTab("users", document.querySelector(".tab-btn")); loadAdminUsers(); }
+}
+window.navTo = navTo;
+
+function switchAuthTab(t) {
+  $("auth-login").style.display    = t==="login"    ? "block" : "none";
+  $("auth-register").style.display = t==="register" ? "block" : "none";
+  document.querySelectorAll(".auth-tab").forEach((b,i) => b.classList.toggle("active", (i===0&&t==="login")||(i===1&&t==="register")));
+}
+window.switchAuthTab = switchAuthTab;
+
+// ─── 認証 ─────────────────────────────────────────────
+async function doLogin() {
+  if (loginSubmitting) return;
+  const email = $("login-email").value.trim();
+  const pass  = $("login-pass").value;
+  $("login-err").textContent = "";
+  if (!email || !pass) { $("login-err").textContent = "メールアドレスとパスワードを入力してください"; return; }
+  loginSubmitting = true;
+  const btn = $("login-btn");
+  btn.disabled = true;
+  btn.textContent = "ログイン中...";
+  try {
+    const res = await api("login", { email, password: pass });
+    session = res;
+    currentUser = res.user;
+    localStorage.setItem("session", JSON.stringify(session));
+    enterApp();
+  } catch(e) {
+    if (e.message === "PENDING") {
+      $("pending-msg").textContent = "アカウントの承認待ちです。管理者または担当の教師が承認するまでお待ちください。";
+      showScreen("screen-pending");
+      showNav(null);
+    } else {
+      $("login-err").textContent = e.message;
+    }
+  } finally {
+    loginSubmitting = false;
+    btn.disabled = false;
+    btn.textContent = "ログイン";
+  }
+}
+window.doLogin = doLogin;
+
+async function doRegister() {
+  const name  = $("reg-name").value.trim();
+  const email = $("reg-email").value.trim();
+  const pass  = $("reg-pass").value;
+  const role  = $("reg-role").value;
+  $("reg-err").textContent = "";
+  if (!name || !email || !pass) { $("reg-err").textContent = "すべての項目を入力してください"; return; }
+  if (pass.length < 6) { $("reg-err").textContent = "パスワードは6文字以上で入力してください"; return; }
+  const btn = $("reg-btn");
+  btn.disabled = true;
+  btn.textContent = "登録中...";
+  try {
+    await api("register", { name, email, password: pass, role });
+    $("reg-err").style.color = "var(--green2)";
+    $("reg-err").textContent = "登録完了！ログインしてください。";
+    setTimeout(() => switchAuthTab("login"), 1500);
+  } catch(e) {
+    $("reg-err").textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "登録する";
+  }
+}
+window.doRegister = doRegister;
+
+function logout() {
+  session = null; currentUser = null;
+  localStorage.removeItem("session");
+  showNav(null);
+  showScreen("screen-login");
+}
+window.logout = logout;
+
+function enterApp() {
+  const role = currentUser.role;
+  showNav(role);
+  if (role === "student")      { showScreen("screen-home");         setActiveNav("nav-home");         loadHome(); }
+  else if (role === "teacher") { showScreen("screen-teacher-home"); setActiveNav("nav-teacher-home"); }
+  else if (role === "admin")   { showScreen("screen-admin");        setActiveNav("nav-admin");        loadAdminUsers(); }
+  else { showScreen("screen-pending"); showNav(null); }
+}
+
+if (session && currentUser) {
+  enterApp();
+}
+
+// ─── HOME ─────────────────────────────────────────────
+async function loadHome() {
+  $("home-name").textContent = currentUser.name + "さん";
+  showNetErr("home-net-err", false);
+  try {
+    const p = await api("getProgress");
+    $("h-score").textContent = p && p.testScore != null ? p.testScore + "%" : "—";
+    $("h-status").textContent = p && p.testDone ? "完了" : "未実施";
+    const done = p ? (p.completedLessons||[]).length : 0;
+    const plan = p ? (p.lessonPlan||[]).length : 0;
+    $("h-progress").textContent = plan > 0 ? done + "/" + plan : "—";
+
+    // 続きから学習カード
+    if (p && p.testDone && plan > done) {
+      $("continue-card").style.display = "block";
+    } else {
+      $("continue-card").style.display = "none";
+    }
+
+    // 苦手分野バナー（設計書：5問以上回答・正答率60%未満 → 復習おすすめ）
+    const weakTopics = p ? (p.weakTopics||[]) : [];
+    if (weakTopics.length > 0) {
+      $("weak-banner").style.display = "block";
+      $("wb-tags").innerHTML = weakTopics.map(t => `<span class="wb-tag">📌 ${t}</span>`).join("");
+    } else {
+      $("weak-banner").style.display = "none";
+    }
+  } catch(e) {
+    showNetErr("home-net-err", true);
+  }
+}
+
+// ─── TEST ─────────────────────────────────────────────
+async function startTest() {
+  showScreen("screen-test");
+  $("test-loading").style.display = "flex";
+  $("test-body").style.display = "none";
+  showNetErr("test-net-err", false);
+  testSubmitting = false;
+  try {
+    testQs = await api("getQuestions");
+    if (!testQs || testQs.length === 0) {
+      $("test-loading").style.display = "none";
+      showNetErr("test-net-err", false);
+      // メッセージをローディング位置に表示
+      $("test-loading").innerHTML = '<div style="text-align:center;color:var(--text2);">問題がまだ登録されていません。<br>教師に依頼してください。</div><button class="btn-secondary" style="margin-top:1rem;" onclick="navTo(\'home\')">ホームに戻る</button>';
+      $("test-loading").style.display = "flex";
+      return;
+    }
+    testIdx = 0; testRes = [];
+    $("test-loading").style.display = "none";
+    $("test-body").style.display = "block";
+    renderQ();
+  } catch(e) {
+    $("test-loading").style.display = "none";
+    showNetErr("test-net-err", true);
+  }
+}
+window.startTest = startTest;
+
+function renderQ() {
+  if (testIdx >= testQs.length) { finishTest(); return; }
+  const q = testQs[testIdx];
+  const total = testQs.length;
+  $("q-prog").style.width = (testIdx / total * 100) + "%";
+  $("q-num").textContent = (testIdx+1) + "/" + total;
+  const dlabel = {1:"基礎",2:"標準",3:"応用"};
+  const dcls   = {1:"diff-1",2:"diff-2",3:"diff-3"};
+  $("q-diff").textContent = dlabel[q.difficulty] || "標準";
+  $("q-diff").className = "diff-badge " + (dcls[q.difficulty] || "diff-2");
+  $("q-text").innerHTML = q.question;
+  $("q-exp").classList.remove("show");
+  $("q-next").classList.remove("show");
+  const opts = $("q-opts");
+  opts.innerHTML = "";
+  (q.options||[]).forEach((o,i) => {
+    const b = document.createElement("button");
+    b.className = "opt-btn"; b.innerHTML = o;
+    b.onclick = () => answerQ(i, q);
+    opts.appendChild(b);
+  });
+}
+
+function answerQ(chosen, q) {
+  document.querySelectorAll(".opt-btn").forEach(b => b.disabled = true);
+  const isOk = chosen === q.answer;
+  testRes.push({ qId: q.id, topic: q.topic, difficulty: q.difficulty, correct: isOk });
+  document.querySelectorAll(".opt-btn").forEach((b,i) => {
+    if (i === q.answer) b.classList.add("correct");
+    else if (i === chosen && !isOk) b.classList.add("wrong");
+  });
+  $("q-exp").innerHTML = "<strong>解説：</strong> " + (q.explanation || "解説なし");
+  $("q-exp").classList.add("show");
+  $("q-next").classList.add("show");
+  if (testIdx === 0 && !isOk) {
+    $("q-next").textContent = "結果を見る（基礎から始めましょう）";
+    $("q-next").onclick = () => finishTest(true);
+    return;
+  }
+  $("q-next").textContent = testIdx + 1 < testQs.length ? "次の問題へ →" : "結果を見る";
+  $("q-next").onclick = () => { testIdx++; renderQ(); };
+}
+
+// 苦手トピック検出（設計書：トピックごとに5問以上解答 かつ 正答率60%未満）
+function detectWeakTopics(results) {
+  const topicMap = {};
+  for (const r of results) {
+    if (!r.topic) continue;
+    if (!topicMap[r.topic]) topicMap[r.topic] = { total: 0, correct: 0 };
+    topicMap[r.topic].total++;
+    if (r.correct) topicMap[r.topic].correct++;
+  }
+  const weaks = [];
+  for (const [topic, stat] of Object.entries(topicMap)) {
+    if (stat.total >= 5 && stat.correct / stat.total < 0.6) {
+      weaks.push(topic);
+    }
+  }
+  // 5問未満のトピックも不正解なら弱点として追加（フォールバック）
+  if (weaks.length === 0) {
+    for (const r of results) {
+      if (!r.correct && r.topic && !weaks.includes(r.topic)) {
+        weaks.push(r.topic);
+      }
+    }
+  }
+  return [...new Set(weaks)];
+}
+
+async function finishTest(early = false) {
+  // 二重送信防止
+  if (testSubmitting) return;
+  testSubmitting = true;
+  const nextBtn = $("q-next");
+  if (nextBtn) { nextBtn.disabled = true; nextBtn.textContent = "保存中..."; }
+
+  const total   = testRes.length;
+  const correct = testRes.filter(r => r.correct).length;
+  const score   = total > 0 ? Math.round(correct / total * 100) : 0;
+  const weaks   = detectWeakTopics(testRes);
+
+  try {
+    const allL = await api("getLessons");
+    let plan = [];
+    if (score < 40 || weaks.length === 0) {
+      plan = allL;
+    } else {
+      plan = allL.filter(l => weaks.includes(l.topic));
+      if (plan.length === 0) plan = allL;
+    }
+    lessonPlan = plan;
+    lessonIdx  = 0;
+
+    await api("saveProgress", {
+      testDone: true, testScore: score,
+      testDate: new Date().toISOString(),
+      weakTopics: weaks,
+      lessonPlan: plan.map(l => l.id),
+      completedLessons: [], earlyEnd: early
+    });
+
+    renderResult(score, total, correct, weaks, plan);
+    showScreen("screen-result");
+    loadHome();
+  } catch(e) {
+    if (nextBtn) { nextBtn.disabled = false; nextBtn.textContent = "結果を見る"; }
+    alert("保存に失敗しました。再度お試しください。\n" + e.message);
+  } finally {
+    testSubmitting = false;
+  }
+}
+
+function renderResult(score, total, correct, weaks, plan) {
+  const pct = score + "%";
+  $("res-ring").style.setProperty("--pct", pct);
+  $("res-score").textContent = score + "%";
+  $("res-sub").textContent = correct + "/" + total + "問正解";
+  $("res-msg").textContent = score >= 80 ? "素晴らしい！応用問題も挑戦しましょう" :
+    score >= 50 ? "基礎はOK！苦手分野を克服しましょう" : "基礎からしっかり学習しましょう！";
+  $("res-weak").innerHTML = weaks.length === 0
+    ? '<span style="color:var(--green2)">苦手分野なし！</span>'
+    : weaks.map(t => `<span class="weak-tag">📌 ${t}</span>`).join("");
+  $("res-plan").innerHTML = plan.slice(0,5).map((l,i) => `
+    <div class="rec-item" onclick="startLessonPlan(${i})">
+      <div class="rec-n">${i+1}</div>
+      <div class="rec-info"><div class="rec-title">${l.title}</div><div class="rec-sub">${l.topic||""}</div></div>
+      <div style="font-size:0.75rem;color:var(--text3);">約${l.duration||5}分</div>
+    </div>`).join("");
+}
+
+// ─── LESSON ───────────────────────────────────────────
+async function startLessonPlan(idx) {
+  if (lessonPlan.length === 0) {
+    lessonPlan = await api("getLessons");
+  }
+  lessonIdx = idx;
+  showScreen("screen-lesson");
+  renderLesson();
+}
+window.startLessonPlan = startLessonPlan;
+
+async function renderLesson() {
+  if (lessonIdx >= lessonPlan.length) {
+    alert("全ての授業を完了しました！🎉"); showScreen("screen-home"); return;
+  }
+  const l = lessonPlan[lessonIdx];
+  $("vid-counter").textContent = (lessonIdx+1) + "/" + lessonPlan.length;
+  $("vid-topic").textContent   = l.topic || "";
+  $("vid-title").textContent   = l.title || "";
+  $("vid-desc").textContent    = l.description || "";
+
+  const wrap = $("vid-wrap");
+  if (l.videoUrl) {
+    const youtubeMatch = l.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    const driveMatch = l.videoUrl.match(/\/file\/d\/([^\/\?]+)/);
+    const src = youtubeMatch
+      ? `https://www.youtube.com/embed/${youtubeMatch[1]}`
+      : driveMatch
+      ? `https://drive.google.com/file/d/${driveMatch[1]}/preview`
+      : l.videoUrl;
+    wrap.innerHTML = `<iframe src="${src}" style="width:100%;aspect-ratio:16/9;border-radius:11px;border:none;" allowfullscreen></iframe>`;
+  } else {
+    wrap.innerHTML = `<div style="height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:11px;color:var(--text2);flex-direction:column;gap:10px;"><div style="font-size:2rem;">🎬</div><div>動画が未設定です</div><div style="font-size:0.78rem;">教師が動画URLを登録すると視聴できます</div></div>`;
+  }
+
+  $("plan-list").innerHTML = lessonPlan.map((pl, i) => {
+    const cls = i === lessonIdx ? "plan-item current-plan" : i < lessonIdx ? "plan-item done-plan" : "plan-item";
+    const dot = i < lessonIdx ? "background:var(--green)" : i === lessonIdx ? "background:var(--accent)" : "background:var(--border2)";
+    return `<div class="${cls}" onclick="lessonIdx=${i};renderLesson()"><div class="plan-dot" style="${dot}"></div>${pl.title}</div>`;
+  }).join("");
+
+  // 学習済み状態を反映
+  try {
+    const p = await api("getProgress").catch(()=>null);
+    const completed = p ? (p.completedLessons||[]) : [];
+    const isDone = completed.includes(l.id);
+    $("vid-done-btn").style.display = isDone ? "none" : "inline-block";
+    $("vid-done-indicator").style.display = isDone ? "flex" : "none";
+  } catch(e) {}
+}
+
+async function goToReview() {
+  const l = lessonPlan[lessonIdx];
+  try {
+    const rqs = await api("getReviewQ", { lessonId: l.id });
+    if (!rqs || rqs.length === 0) {
+      await markDone(l.id);
+      lessonIdx++;
+      renderLesson();
+      return;
+    }
+    renderReview(rqs, l.id);
+    showScreen("screen-review");
+  } catch(e) {
+    alert("読み込みに失敗しました: " + e.message);
+  }
+}
+window.goToReview = goToReview;
+
+// 「学習済みにする」ボタン（復習問題なしでも完了にできる）
+async function markDoneAndNext() {
+  const l = lessonPlan[lessonIdx];
+  const btn = $("vid-done-btn");
+  btn.disabled = true;
+  btn.textContent = "保存中...";
+  try {
+    await markDone(l.id);
+    btn.style.display = "none";
+    $("vid-done-indicator").style.display = "flex";
+    // 次の未完了授業があれば少し待って移動
+    setTimeout(() => {
+      lessonIdx++;
+      if (lessonIdx < lessonPlan.length) renderLesson();
+      else { alert("全ての授業を完了しました！🎉"); navTo("home"); }
+    }, 1200);
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = "✓ 学習済みにする";
+    alert("保存に失敗しました。再度お試しください。");
+  }
+}
+window.markDoneAndNext = markDoneAndNext;
+
+function renderReview(qs, lessonId) {
+  let cur = 0, score = 0;
+  $("rev-title").textContent = lessonPlan[lessonIdx].title;
+  $("rev-tot").textContent = qs.length;
+  function next() {
+    if (cur >= qs.length) {
+      $("rev-area").innerHTML = `<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;">🎉</div><div style="font-size:1.15rem;margin:0.9rem 0;font-family:var(--serif);color:var(--text);">復習完了！</div><div style="color:var(--text2);margin-bottom:1.25rem;">${score}/${qs.length}問正解</div><button class="btn-primary" onclick="completeReview('${lessonId}')">次の授業へ →</button></div>`;
+      return;
+    }
+    const q = qs[cur];
+    $("rev-cur").textContent = cur + 1;
+    $("rev-area").innerHTML = `<div class="q-card"><div class="q-text">${q.question}</div><div class="opts-grid" id="rev-opts"></div><div class="exp-box" id="rev-exp"></div></div>`;
+    const grid = $("rev-opts");
+    (q.options||[]).forEach((o,i) => {
+      const b = document.createElement("button");
+      b.className = "opt-btn"; b.innerHTML = o;
+      b.onclick = () => {
+        grid.querySelectorAll("button").forEach(x => x.disabled = true);
+        if (i === q.answer) { b.classList.add("correct"); score++; }
+        else { b.classList.add("wrong"); grid.querySelectorAll("button")[q.answer].classList.add("show-ok"); }
+        const ex = $("rev-exp");
+        ex.innerHTML = "<strong>解説：</strong> " + (q.explanation || "解説なし");
+        ex.classList.add("show");
+        setTimeout(() => { cur++; next(); }, 1900);
+      };
+      grid.appendChild(b);
+    });
+  }
+  next();
+}
+
+async function completeReview(lessonId) {
+  await markDone(lessonId);
+  lessonIdx++;
+  showScreen("screen-lesson");
+  renderLesson();
+}
+window.completeReview = completeReview;
+
+async function markDone(lessonId) {
+  const p = await api("getProgress");
+  const done = p ? (p.completedLessons||[]) : [];
+  if (!done.includes(lessonId)) done.push(lessonId);
+  const plan = p ? (p.lessonPlan||[]) : [];
+  await api("saveProgress", {
+    testDone: p ? p.testDone : false,
+    testScore: p ? p.testScore : null,
+    testDate: p ? p.testDate : "",
+    weakTopics: p ? (p.weakTopics||[]) : [],
+    lessonPlan: plan,
+    completedLessons: done,
+    earlyEnd: p ? p.earlyEnd : false
+  });
+}
+
+// ─── LESSONS LIST ─────────────────────────────────────
+let _lessonsCache = [];
+let _completedCache = [];
+let _planCache = [];
+
+async function loadLessonsList() {
+  try {
+    const [lessons, p] = await Promise.all([api("getLessons"), api("getProgress").catch(()=>null)]);
+    _lessonsCache = lessons;
+    _completedCache = p ? (p.completedLessons||[]) : [];
+    _planCache      = p ? (p.lessonPlan||[]) : [];
+    allLessons = lessons;
+    renderLessonsGrid(lessons, _completedCache, _planCache, null);
+  } catch(e) {}
+}
+
+function filterLessons(keyword, btn) {
+  document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+  btn.classList.add("active");
+  renderLessonsGrid(_lessonsCache, _completedCache, _planCache, keyword);
+}
+window.filterLessons = filterLessons;
+
+function renderLessonsGrid(lessons, completed, plan, keyword) {
+  const filtered = keyword ? lessons.filter(l => l.topic && l.topic.includes(keyword)) : lessons;
+  $("ls-grid").innerHTML = filtered.map((l,i) => {
+    const isDone = completed.includes(l.id);
+    const isRec  = plan.includes(l.id);
+    return `<div class="ls-card" onclick="openLesson('${l.id}')">
+      <div class="ls-thumb">
+        <div class="ls-formula">${l.formula||"数学"}</div>
+        <div class="ls-play"><div class="play-circle">▶</div></div>
+        ${isDone ? '<div class="ls-badge" style="background:var(--green);color:#fff;">✓</div>' :
+          isRec  ? '<div class="ls-badge" style="background:var(--accent);color:#fff;font-size:0.55rem;">推薦</div>' : ''}
+      </div>
+      <div class="ls-info">
+        <div class="ls-order">第${l.order||i+1}講</div>
+        <div class="ls-name">${l.title}</div>
+        <div class="ls-meta"><span class="topic-tag">${l.topic||""}</span><span>約${l.duration||5}分</span></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function openLesson(id) {
+  const all = _lessonsCache.length > 0 ? _lessonsCache : await api("getLessons");
+  lessonPlan = all;
+  lessonIdx  = all.findIndex(l => l.id === id);
+  if (lessonIdx < 0) lessonIdx = 0;
+  showScreen("screen-lesson");
+  renderLesson();
+}
+window.openLesson = openLesson;
+
+// ─── MYPAGE ───────────────────────────────────────────
+async function loadMyPage() {
+  $("mp-name").textContent  = currentUser.name;
+  $("mp-email").textContent = currentUser.email;
+  $("mp-role").textContent  = {student:"生徒",teacher:"教師",admin:"管理者"}[currentUser.role] || currentUser.role;
+  try {
+    const p = await api("getProgress");
+    if (p) {
+      $("mp-score").textContent    = p.testScore != null ? p.testScore + "%" : "—";
+      $("mp-done").textContent     = (p.completedLessons||[]).length;
+      $("mp-plan-cnt").textContent = (p.lessonPlan||[]).length;
+      const pct = p.lessonPlan && p.lessonPlan.length > 0
+        ? Math.round((p.completedLessons||[]).length / p.lessonPlan.length * 100) : 0;
+      $("mp-pct").textContent = pct + "%";
+      const offset = 201 - (201 * pct / 100);
+      $("ring-arc").style.strokeDashoffset = offset;
+      $("mp-weak").innerHTML = (p.weakTopics||[]).map(t => `<span class="weak-tag">${t}</span>`).join("") || '<span style="color:var(--text3)">—</span>';
+    }
+  } catch(e) {}
+}
+
+// ─── TEACHER ──────────────────────────────────────────
+function teacherTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  $("tp-"+name).classList.add("active");
+  if (btn) btn.classList.add("active");
+  if (name === "students") loadStudents();
+  if (name === "questions") loadQTable();
+  if (name === "lessons") loadLTable();
+  if (name === "review") loadRQSel();
+}
+window.teacherTab = teacherTab;
+
+async function loadStudents() {
+  const students = await api("getStudents");
+  const tbody = $("student-tbody");
+  if (!students.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:1.5rem;">生徒がまだいません</td></tr>'; return; }
+  tbody.innerHTML = "";
+  for (const s of students) {
+    const p = await api("getStudentProgress", { uid: s.uid }).catch(()=>null);
+    const done  = p ? (p.completedLessons||[]).length : 0;
+    const plan  = p ? (p.lessonPlan||[]).length : 0;
+    const pct   = plan > 0 ? Math.round(done/plan*100) : 0;
+    const weaks = p ? (p.weakTopics||[]).join(", ") || "—" : "—";
+    tbody.innerHTML += `<tr>
+      <td>${s.name||s.email}</td>
+      <td>${p && p.testScore != null ? p.testScore+"%" : "未実施"}</td>
+      <td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--accent);"></div></div><span style="font-size:0.76rem;color:var(--text2);">${done}/${plan}</span></div></td>
+      <td style="font-size:0.78rem;color:var(--text2);">${weaks}</td>
+      <td><button class="btn-sm btn-danger" onclick="removeStudent('${s.uid}')">削除</button></td>
+    </tr>`;
+  }
+}
+
+async function addStudent() {
+  const email = $("add-email").value.trim();
+  if (!email) return;
+  try { await api("addStudent", { email }); $("add-email").value = ""; alert("追加しました！"); loadStudents(); }
+  catch(e) { alert(e.message); }
+}
+window.addStudent = addStudent;
+
+async function removeStudent(uid) {
+  if (!confirm("削除しますか？")) return;
+  await api("removeStudent", { uid }); loadStudents();
+}
+window.removeStudent = removeStudent;
+
+async function loadQTable() {
+  const qs = await api("getAllQuestions");
+  const dlabel = {1:"基礎",2:"標準",3:"応用"};
+  const dcls   = {1:"diff-1",2:"diff-2",3:"diff-3"};
+  $("q-tbody").innerHTML = (qs||[]).map(q => `<tr>
+    <td><span class="diff-badge ${dcls[q.difficulty]||"diff-2"}">${dlabel[q.difficulty]||"—"}</span></td>
+    <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.question}</td>
+    <td>${q.topic||"—"}</td>
+    <td><button class="btn-sm" onclick="editQ('${q.id}')">編集</button><button class="btn-sm btn-danger" onclick="delQ('${q.id}')">削除</button></td>
+  </tr>`).join("");
+}
+
+function openQModal(q) {
+  $("m-q-title").textContent = q ? "問題を編集" : "問題を追加";
+  $("mq-id").value = q ? q.id : "";
+  $("mq-q").value  = q ? q.question : "";
+  (q ? q.options : ["","","",""]).forEach((o,i) => $("mq-o"+i).value = o);
+  $("mq-ans").value   = q ? q.answer : 0;
+  $("mq-diff").value  = q ? q.difficulty : 1;
+  $("mq-topic").value = q ? q.topic : "";
+  $("mq-exp").value   = q ? q.explanation : "";
+  $("m-q").style.display = "flex";
+}
+window.openQModal = openQModal;
+
+async function editQ(id) {
+  const qs = await api("getAllQuestions");
+  openQModal(qs.find(q => q.id === id));
+}
+window.editQ = editQ;
+
+async function saveQ() {
+  const id = $("mq-id").value;
+  const data = { question:$("mq-q").value, options:[$("mq-o0").value,$("mq-o1").value,$("mq-o2").value,$("mq-o3").value],
+    answer:parseInt($("mq-ans").value), difficulty:parseInt($("mq-diff").value), topic:$("mq-topic").value, explanation:$("mq-exp").value };
+  await api(id ? "updateQuestion" : "addQuestion", id ? {...data,id} : data);
+  closeM("m-q"); loadQTable();
+}
+window.saveQ = saveQ;
+
+async function delQ(id) {
+  if (!confirm("削除しますか？")) return;
+  await api("deleteQuestion", {id}); loadQTable();
+}
+window.delQ = delQ;
+
+async function loadLTable() {
+  const ls = await api("getAllLessons");
+  $("l-tbody").innerHTML = (ls||[]).map(l => `<tr>
+    <td>${l.order}</td>
+    <td>${l.title}</td>
+    <td>${l.topic||"—"}</td>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.videoUrl ? `<a href="${l.videoUrl}" target="_blank" style="color:var(--accent);">リンク</a>` : "未設定"}</td>
+    <td><button class="btn-sm" onclick="editL('${l.id}')">編集</button><button class="btn-sm btn-danger" onclick="delL('${l.id}')">削除</button></td>
+  </tr>`).join("");
+}
+
+function openLModal(l) {
+  $("m-l-title").textContent = l ? "動画を編集" : "動画を追加";
+  $("ml-id").value      = l ? l.id : "";
+  $("ml-title").value   = l ? l.title : "";
+  $("ml-topic").value   = l ? l.topic : "";
+  $("ml-order").value   = l ? l.order : "";
+  $("ml-url").value     = l ? l.videoUrl : "";
+  $("ml-dur").value     = l ? l.duration : 5;
+  $("ml-desc").value    = l ? l.description : "";
+  $("ml-formula").value = l ? l.formula : "";
+  $("m-l").style.display = "flex";
+}
+window.openLModal = openLModal;
+
+async function editL(id) {
+  const ls = await api("getAllLessons");
+  openLModal(ls.find(l => l.id === id));
+}
+window.editL = editL;
+
+async function saveL() {
+  const id = $("ml-id").value;
+  const data = { title:$("ml-title").value, topic:$("ml-topic").value, order:parseInt($("ml-order").value)||1,
+    videoUrl:$("ml-url").value, duration:parseInt($("ml-dur").value)||5, description:$("ml-desc").value, formula:$("ml-formula").value };
+  await api(id ? "updateLesson" : "addLesson", id ? {...data,id} : data);
+  closeM("m-l"); loadLTable();
+}
+window.saveL = saveL;
+
+async function delL(id) {
+  if (!confirm("削除しますか？")) return;
+  await api("deleteLesson",{id}); loadLTable();
+}
+window.delL = delL;
+
+async function loadRQSel() {
+  const ls = await api("getAllLessons");
+  const sel = $("rq-lesson-sel");
+  sel.innerHTML = '<option value="">動画を選択...</option>';
+  (ls||[]).forEach(l => sel.innerHTML += `<option value="${l.id}">${l.order}. ${l.title}</option>`);
+}
+
+async function loadRQ() {
+  const lid = $("rq-lesson-sel").value;
+  if (!lid) return;
+  const qs = await api("getReviewQ", { lessonId: lid });
+  $("rq-tbody").innerHTML = (qs||[]).length === 0
+    ? '<tr><td colspan="2" style="text-align:center;color:var(--text2);padding:1.5rem;">復習問題なし</td></tr>'
+    : (qs||[]).map(q => `<tr>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.question}</td>
+        <td><button class="btn-sm" onclick="editRQ('${q.id}')">編集</button><button class="btn-sm btn-danger" onclick="delRQ('${q.id}')">削除</button></td>
+      </tr>`).join("");
+}
+window.loadRQ = loadRQ;
+
+function openRQModal(rq) {
+  const lid = $("rq-lesson-sel").value;
+  if (!lid && !rq) { alert("先に動画を選択してください"); return; }
+  $("m-rq-title").textContent = rq ? "復習問題を編集" : "復習問題を追加";
+  $("mrq-id").value  = rq ? rq.id : "";
+  $("mrq-lid").value = rq ? rq.lessonId : lid;
+  $("mrq-q").value   = rq ? rq.question : "";
+  (rq ? rq.options : ["","","",""]).forEach((o,i) => $("mrq-o"+i).value = o);
+  $("mrq-ans").value = rq ? rq.answer : 0;
+  $("mrq-exp").value = rq ? rq.explanation : "";
+  $("m-rq").style.display = "flex";
+}
+window.openRQModal = openRQModal;
+
+async function editRQ(id) {
+  const qs = await api("getReviewQ", { lessonId: $("rq-lesson-sel").value });
+  openRQModal(qs.find(q => q.id === id));
+}
+window.editRQ = editRQ;
+
+async function saveRQ() {
+  const id = $("mrq-id").value;
+  const data = { lessonId:$("mrq-lid").value, question:$("mrq-q").value,
+    options:[$("mrq-o0").value,$("mrq-o1").value,$("mrq-o2").value,$("mrq-o3").value],
+    answer:parseInt($("mrq-ans").value), explanation:$("mrq-exp").value };
+  await api(id ? "updateReviewQ" : "addReviewQ", id ? {...data,id} : data);
+  closeM("m-rq"); loadRQ();
+}
+window.saveRQ = saveRQ;
+
+async function delRQ(id) {
+  if (!confirm("削除しますか？")) return;
+  await api("deleteReviewQ",{id}); loadRQ();
+}
+window.delRQ = delRQ;
+
+// ─── ADMIN ────────────────────────────────────────────
+function adminTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  $("ap-"+name).classList.add("active");
+  if (btn) btn.classList.add("active");
+  if (name === "users") loadAdminUsers();
+  if (name === "stats") loadStats();
+}
+window.adminTab = adminTab;
+
+async function loadAdminUsers() {
+  const users = await api("getAllUsers");
+  const roleBadge = {
+    admin:`<span style="color:var(--purple)">管理者</span>`,
+    teacher:`<span style="color:var(--accent)">教師</span>`,
+    student:`<span style="color:var(--green2)">生徒</span>`,
+    pending:`<span style="color:var(--yellow)">承認待ち</span>`
+  };
+  $("admin-tbody").innerHTML = (users||[]).map(u => `<tr>
+    <td>${u.name||"—"}</td>
+    <td>${u.email||"—"}</td>
+    <td>${roleBadge[u.role]||u.role}</td>
+    <td>
+      <select class="form-input" style="padding:4px 8px;font-size:0.76rem;display:inline-block;width:auto;" onchange="changeRole('${u.uid}',this.value)">
+        <option value="pending" ${u.role==="pending"?"selected":""}>承認待ち</option>
+        <option value="student" ${u.role==="student"?"selected":""}>生徒</option>
+        <option value="teacher" ${u.role==="teacher"?"selected":""}>教師</option>
+        <option value="admin"   ${u.role==="admin"?"selected":""}>管理者</option>
+      </select>
+      <button class="btn-sm btn-danger" onclick="delUser('${u.uid}')">削除</button>
+    </td>
+  </tr>`).join("");
+}
+
+async function changeRole(uid, role) {
+  await api("changeRole", {uid, role}); alert("ロールを変更しました"); loadAdminUsers();
+}
+window.changeRole = changeRole;
+
+async function delUser(uid) {
+  if (!confirm("削除しますか？")) return;
+  await api("deleteUser", {uid}); loadAdminUsers();
+}
+window.delUser = delUser;
+
+async function loadStats() {
+  const s = await api("getStats");
+  $("st-students").textContent = s.totalStudents;
+  $("st-teachers").textContent = s.totalTeachers;
+  $("st-pending").textContent  = s.totalPending;
+  $("st-tested").textContent   = s.testedCount;
+  $("st-avg").textContent      = s.avgScore + "%";
+}
+
+function closeM(id) { $(id).style.display = "none"; }
+window.closeM = closeM;
+document.querySelectorAll(".modal-bg").forEach(m => m.addEventListener("click", e => { if(e.target===m) m.style.display="none"; }));
+</script>
+</body>
+</html>
